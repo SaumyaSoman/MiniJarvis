@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MiniJarvis</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+	<string name="glass_voice_trigger">inform me</string>
+	<string name="camerademo_livecard_content">Tap to Take Photo</string>
+	<string name="camerademo_screen_content">Camera Demo\nTap to Take Photo</string>
+	
+</resources>
