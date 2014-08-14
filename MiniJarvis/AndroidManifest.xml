@@ -21,7 +21,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name">
         <activity
-            android:name="edu.winlab.minijarvis.activity.CopyOfCameraActivity"
+            android:name="edu.winlab.minijarvis.activity.CameraActivity"
             android:label="@string/app_name"
             android:enabled="true" >
             <intent-filter>
@@ -36,13 +36,6 @@
             android:label="@string/app_name"
             android:enabled="true" >
         </activity>
-        <service
-            android:name="edu.winlab.minijarvis.activity.InformService"
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/app_name"
-            android:enabled="true"
-            android:exported="true">
-        </service>
     </application>
 
 </manifest>

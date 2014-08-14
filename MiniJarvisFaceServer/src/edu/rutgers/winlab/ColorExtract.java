@@ -14,30 +14,42 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Analyse colors of a given bitmap.
+ * To extract the color of a recognized object in an image
+ * Inspired by an blog post of Jared Allen (http://chironexsoftware.com/blog/?p=60) and Niko Schmuck
+ * @author Saumya
  *
- * Inspired by an blog post of Jared Allen (http://chironexsoftware.com/blog/?p=60)
- *
- * @author Niko Schmuck
  */
 public class ColorExtract {
+	
     public static void main(String[] args) throws IOException {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        System.out.println(new EntityDetect().run("C:\\Users\\Saumya\\Pictures\\picture1.jpg"));
-//    	ImageSearch search =new ImageSearch();
-//    	search.getSearchResults("C:\\Users\\Saumya\\Pictures\\2.jpg", "saumya soman");
-        
+        System.out.println(new EntityDetect().run("C:\\Users\\Saumya\\Pictures\\picture1.jpg"));        
     }
+    
+    /**
+     * Method to analyze colors in an image
+     * @param filename image filename
+     * @param rectx
+     * @param recty
+     * @param w
+     * @param h
+     * @return String most dominant color
+     * @throws IOException
+     */
 	public String analyseColors(String filename, int rectx, int recty, int w, int h) throws IOException {
     	
+		//read the image
     	File file = new File(filename);
         ImageInputStream is = ImageIO.createImageInputStream(file);
         Iterator<ImageReader> iter = ImageIO.getImageReaders(is);
         ImageReader imageReader = iter.next();
         imageReader.setInput(is);
 
+        //get subimage of the image, i.e. the portion enclosed within the rectangle
         BufferedImage image = imageReader.read(0);
         BufferedImage subImage=image.getSubimage(rectx, recty, w-rectx, h-recty);
+        
+        //rescale to 32X32 pixels to spped up the process. Used Scalr library.
         BufferedImage thumbnail = Scalr.resize(subImage, 32, 32);
         int height = thumbnail.getHeight();
         int width = thumbnail.getWidth();
@@ -167,6 +179,7 @@ public class ColorExtract {
         }
     }
     
+    // list of colors
     private ArrayList<ColorName> initColorList() {
         ArrayList<ColorName> colorList = new ArrayList<ColorName>();
         colorList.add(new ColorName("aqua", 0x00, 0xFF, 0xFF));

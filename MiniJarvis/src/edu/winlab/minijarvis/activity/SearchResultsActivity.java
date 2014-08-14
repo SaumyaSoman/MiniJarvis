@@ -6,10 +6,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.android.glass.app.Card;
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
+import com.google.android.glass.widget.CardScrollAdapter;
+import com.google.android.glass.widget.CardScrollView;
 
-import edu.winlab.minijarvis.R;
 import edu.winlab.minijarvis.model.SearchResults;
 import android.app.Activity;
 import android.content.Context;
@@ -18,84 +20,138 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
-import android.widget.Toast;
 
-public class SearchResultsActivity extends Activity{
+/**
+ * This activity displays search results from Google in cards
+ * @author Saumya
+ *
+ */
 
+public class SearchResultsActivity extends Activity {
+
+	private ArrayList<Card> mCards;
+	private CardScrollView mCardScrollView;
 	private GestureDetector mGestureDetector = null;
-	private ListView lv1 =null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.livecard_camerademo);
+
 		Intent intent = getIntent();
 		String content=intent.getStringExtra("JSON_Object");
 		ArrayList<SearchResults> responses=extractResults(content);		
-		lv1 = (ListView) findViewById(R.id.listV_main);
-		lv1.setAdapter(new ResponseListBaseAdapter(this, responses));
-		if(lv1 != null){
-			lv1.setAdapter(new ResponseListBaseAdapter(this, responses));
-			lv1.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-			lv1.setClickable(true);
-			lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-		         public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-		        	 Log.d("MY_LOG", "click at position " + position);
-		         }
-		    });
-		}
 
+		createCards(responses);
+
+		mCardScrollView = new CardScrollView(this);
+		CSAdapter adapter = new CSAdapter();
+		mCardScrollView.setAdapter(adapter);
+		mCardScrollView.activate();
+		setContentView(mCardScrollView);
+		mCardScrollView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+				Log.d("Click","click at position " + position);
+			}
+		});
 		mGestureDetector = createGestureDetector(this);
 	}
 	
-	private GestureDetector createGestureDetector(Context context) {
-		  GestureDetector gestureDetector = new GestureDetector(context);
-		    //Create a base listener for generic gestures
-		    gestureDetector.setBaseListener( new GestureDetector.BaseListener() {
-		        @Override
-		        public boolean onGesture(Gesture gesture) {
-		            if (gesture == Gesture.TAP) { // On Tap, generate a new number
-		                return true;
-		            } else if (gesture == Gesture.LONG_PRESS) {
-						Object object = lv1.getSelectedItem();
-					    SearchResults selectedResult = (SearchResults)object;
-					    System.out.println(selectedResult.toString());
-		            	//System.out.println(selectedResult.getLink());
-		            	Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedResult.getLink()));
-		            	startActivity(browserIntent);
-		                return true;
-		            } else if (gesture == Gesture.SWIPE_RIGHT) {
-		                // do something on right (forward) swipe
-		            	System.out.println("here"+lv1.getSelectedItemPosition());
-		                lv1.setSelection(lv1.getSelectedItemPosition()+1);
-		                return true;
-		            } else if (gesture == Gesture.SWIPE_LEFT) {
-		                // do something on left (backwards) swipe
-		            	System.out.println("right"+lv1.getSelectedItemPosition());
-		                lv1.setSelection(lv1.getSelectedItemPosition()-1);
-		                return true;
-		            }
-		            return false;
-		        }
-		    });
-		    gestureDetector.setFingerListener(new GestureDetector.FingerListener() {
-		        @Override
-		        public void onFingerCountChanged(int previousCount, int currentCount) {
-		          // do something on finger count changes
-		        }
-		    });
-		    gestureDetector.setScrollListener(new GestureDetector.ScrollListener() {
-		        @Override
-		        public boolean onScroll(float displacement, float delta, float velocity) {
-		            // do something on scrolling
+	/**
+	 * Method to create cards for each search result
+	 * @param responses ArrayList<SearchResults>
+	 */
 
-		            return false;
-		        }
-		    });
-		    return gestureDetector;
+	private void createCards(ArrayList<SearchResults> responses) {
+		mCards = new ArrayList<Card>();
+
+		for (SearchResults searchResults : responses) {
+			Card card= new Card(this);
+			card.setText(searchResults.getSnippet());
+			card.setFootnote(searchResults.getLink());
+			mCards.add(card);
+		}
+	}
+
+	/**
+	 * Adaptor for card scroll
+	 * @author Saumya
+	 *
+	 */
+	private class CSAdapter extends CardScrollAdapter {
+
+		@Override
+		public int getPosition(Object item) {
+			return mCards.indexOf(item);
+		}
+
+		@Override
+		public int getCount() {
+			return mCards.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return mCards.get(position);
+		}
+
+		@Override
+		public int getViewTypeCount() {
+			return Card.getViewTypeCount();
+		}
+
+		@Override
+		public int getItemViewType(int position){
+			return mCards.get(position).getItemViewType();
+		}
+
+		@Override
+		public View getView(int position, View convertView,
+				ViewGroup parent) {
+			return  mCards.get(position).getView(convertView, parent);
+		}
+	}
+
+	/**
+	 * Method to detect gesture (long press/tap) and opens the url
+	 * @param context
+	 * @return GestureDetector
+	 */
+	private GestureDetector createGestureDetector(Context context) {
+		GestureDetector gestureDetector = new GestureDetector(context);
+		//Create a base listener for generic gestures
+		gestureDetector.setBaseListener( new GestureDetector.BaseListener() {
+			@Override
+			public boolean onGesture(Gesture gesture) {
+				if (gesture == Gesture.LONG_PRESS || gesture == Gesture.TAP) {
+					Object object = mCardScrollView.getSelectedItem();
+					Card selectedResult = (Card)object;
+					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedResult.getFootnote().toString()));
+					startActivity(browserIntent);
+					return true;
+				}
+				return false;
+			}
+
+		});
+
+		gestureDetector.setFingerListener(new GestureDetector.FingerListener() {
+			@Override
+			public void onFingerCountChanged(int previousCount, int currentCount) {
+				// do something on finger count changes
+			}
+		});
+		gestureDetector.setScrollListener(new GestureDetector.ScrollListener() {
+			@Override
+			public boolean onScroll(float displacement, float delta, float velocity) {
+				// do something on scrolling
+
+				return false;
+			}
+		});
+		return gestureDetector;
 	}
 
 	/*
@@ -108,31 +164,31 @@ public class SearchResultsActivity extends Activity{
 		}
 		return false;
 	}
-		
+
+	/**
+	 * Method to extract search results from JSON response string
+	 * @param content JSON response string
+	 * @return ArrayList<SearchResults>
+	 */
 	public ArrayList<SearchResults> extractResults(String content){
 		JSONObject jsonResponse;
 		try {
 			jsonResponse = new JSONObject(content);
-		    JSONArray jsonMainNode = jsonResponse.optJSONArray("responses");		            
-		    ArrayList<SearchResults> searchResults=new ArrayList<SearchResults>();
-		    for(int i=0; i<jsonMainNode.length(); i++){
-				 						JSONObject jsonChildNode = jsonMainNode.getJSONObject(i);
-				 						SearchResults data=new SearchResults();
-				 						/******* Fetch node values **********/
-				 						data.setTitle(jsonChildNode.optString("title"));
-				 						data.setLink(jsonChildNode.optString("link"));
-				 						data.setSnippet(jsonChildNode.optString("snippet"));
-				 						searchResults.add(data);
-		    }	
-		    return searchResults;
+			JSONArray jsonMainNode = jsonResponse.optJSONArray("responses");		            
+			ArrayList<SearchResults> searchResults=new ArrayList<SearchResults>();
+			for(int i=0; i<jsonMainNode.length(); i++){
+				JSONObject jsonChildNode = jsonMainNode.getJSONObject(i);
+				SearchResults data=new SearchResults();
+				data.setTitle(jsonChildNode.optString("title"));
+				data.setLink(jsonChildNode.optString("link"));
+				data.setSnippet(jsonChildNode.optString("snippet"));
+				searchResults.add(data);
+			}	
+			return searchResults;
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 
 	}
-
-	
-
 }

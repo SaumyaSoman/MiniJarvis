@@ -1,11 +1,9 @@
-package edu.winlab.minijarvis.model;
+package edu.rutgers.winlab.response;
 
-/**
- * DAO for searchResults
- * @author Saumya
- *
- */
-public class SearchResults {
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+public class SearchResponse {
 	
 	private String title;
 	private String link;
@@ -46,5 +44,14 @@ public class SearchResults {
 	public void setSnippet(String snippet) {
 		this.snippet = snippet;
 	}
-		
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "SearchResponse [title=" + title + ", link=" + link
+				+ ", snippet=" + snippet + "]";
+	}
+	
+	
 }

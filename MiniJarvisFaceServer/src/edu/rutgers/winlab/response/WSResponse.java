@@ -1,18 +1,20 @@
-package edu.winlab.minijarvis.model;
+package edu.rutgers.winlab.response;
 
 
 import java.util.ArrayList;
+import javax.xml.bind.annotation.XmlRootElement;
 
 
+@XmlRootElement
 /**
- * Response class 
+ * Web service response  
  * @author Saumya
  *
  */
-public class Results{
+public class WSResponse{
 	
 	private String text;
-	private ArrayList<SearchResults> responses=new ArrayList<>();
+	private ArrayList<SearchResponse> responses=new ArrayList<>();
 	
 	/**
 	 * @return the text
@@ -31,14 +33,14 @@ public class Results{
 	/**
 	 * @return the events
 	 */
-	public ArrayList<SearchResults> getResponses() {
+	public ArrayList<SearchResponse> getResponses() {
 		return responses;
 	}
 
 	/**
 	 * @param events the events to set
 	 */
-	public void setResponses(ArrayList<SearchResults> events) {
+	public void setResponses(ArrayList<SearchResponse> events) {
 		this.responses = events;
 	}
 
