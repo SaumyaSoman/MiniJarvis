@@ -21,3 +21,5 @@ Inside the server
 Face detection is done by OpenCV haarcascade classifiers. For face/object recognition the system must be trained and the face/object should be in the database (file system). The identified face/object is enclosed within a rectangle.
 For color extraction, the image within the rectangle is rescaled to 32X32. The most dominant color is found by iterating through the pixels of the rescaled image.
 Including the color of the object along with the object identified returns more relevant search results.
+
+For further information visit https://sites.google.com/site/minijarviswinlab/home
