@@ -3,43 +3,43 @@ package edu.winlab.minijarvis.model;
 
 import java.util.ArrayList;
 
-
 /**
  * Response class 
  * @author Saumya
  *
  */
 public class Results{
+	private String result="";
+	private ArrayList<Annotations> annotations=new ArrayList<Annotations>();
 	
-	private String text;
-	private ArrayList<SearchResults> responses=new ArrayList<>();
 	
+
 	/**
-	 * @return the text
+	 * @return the result
 	 */
-	public String getText() {
-		return text;
+	public String getResult() {
+		return result;
 	}
 
 	/**
-	 * @param text the text to set
+	 * @param result the result to set
 	 */
-	public void setText(String text) {
-		this.text = text;
+	public void setResult(String result) {
+		this.result = result;
 	}
 
 	/**
-	 * @return the events
+	 * @return the annotations
 	 */
-	public ArrayList<SearchResults> getResponses() {
-		return responses;
+	public ArrayList<Annotations> getAnnotations() {
+		return annotations;
 	}
 
 	/**
-	 * @param events the events to set
+	 * @param annotations the annotations to set
 	 */
-	public void setResponses(ArrayList<SearchResults> events) {
-		this.responses = events;
+	public void setAnnotations(ArrayList<Annotations> annotations) {
+		this.annotations = annotations;
 	}
 
 }

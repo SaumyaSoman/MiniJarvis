@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.UUID;
 
 
 import javax.ws.rs.Consumes;
@@ -17,9 +20,12 @@ import javax.ws.rs.core.MediaType;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
-import edu.rutgers.winlab.EntityDetect;
-import edu.rutgers.winlab.ImageSearch;
-import edu.rutgers.winlab.response.SearchResponse;
+import edu.rutgers.winlab.Constants;
+import edu.rutgers.winlab.javafaces.DetectedFaces;
+import edu.rutgers.winlab.javafaces.FaceDetect;
+import edu.rutgers.winlab.javafaces.FaceRecognition;
+import edu.rutgers.winlab.javafaces.MatchResult;
+import edu.rutgers.winlab.response.Annotations;
 import edu.rutgers.winlab.response.WSResponse;
 
 
@@ -40,27 +46,54 @@ public class ImageService {
 			@FormDataParam("image") FormDataContentDisposition fileDetail) {
 
 		//save the received image with this name
-		String uploadedFileLocation = "e://game/" + fileDetail.getFileName();
+		
+		System.out.println(Constants.FILE_LOCATION);
+		String uploadedFileLocation = Constants.FILE_LOCATION+ fileDetail.getFileName();
 
 		WSResponse response=new WSResponse();
 		try{
+			long startTime=System.currentTimeMillis();
 			saveToFile(uploadedInputStream, uploadedFileLocation);
-			String output=new EntityDetect().run(uploadedFileLocation);		
-			if(output==null){
+			UUID requestId = UUID.randomUUID();
+			FaceDetect faceDetect=new FaceDetect();
+			HashMap<String, ArrayList<DetectedFaces>> faceList=faceDetect.run(requestId.toString(),uploadedFileLocation);
+			FaceRecognition recognition= new FaceRecognition();
+			HashMap<String, MatchResult> names=recognition.recognize(requestId.toString(),faceList);
+			String output="";
+			if(names==null){
 				output= "Cannot be recognized";
 			}else{
-				//if object/face is identified, do google search
-				ImageSearch search=new ImageSearch();
-				ArrayList<SearchResponse> searchResp=search.getSearchResults(uploadedFileLocation,output);
-				response.setResponses(searchResp);
+				//if face is identified, do google search
+				ArrayList<Annotations> annotations=new ArrayList<Annotations>();
+				for (Entry<String, MatchResult> name : names.entrySet()) {
+					Annotations annotation=new Annotations();
+					//ImageSearch search=new ImageSearch();
+					//ArrayList<SearchResponse> searchResp=search.getSearchResults(uploadedFileLocation,output);
+					System.out.println(name);
+					annotation.setText(name.getKey());
+					if(name.getValue()!=null){
+						DetectedFaces face=name.getValue().getFace();
+						annotation.setX(face.getX());
+						annotation.setY(face.getY());
+						annotation.setHeight(face.getHeight());
+						annotation.setWidth(face.getWidth());
+					}					
+					annotations.add(annotation);
+				}
+				response.setAnnotations(annotations);
 			}
-			response.setText(output);
+			response.setResult(output);
+			
+			long endTime=System.currentTimeMillis();
+			 
+			System.out.println("\ntotal time taken="+(endTime-startTime)+" millisecs");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return response;
 
 	}
+
 
 	/**
 	 * Method to save uploaded file to new location
@@ -85,6 +118,58 @@ public class ImageService {
 		}
 
 	}
+	
+	
+	//public static void main(String[] args) {
+//	File[] files=new File("E:\\Software\\eclipse-jee-juno-SR1-win32-x86_64\\test").listFiles();
+//	for(int i=0;i<files.length;i++){
+//		String uploadedFileLocation = "E:\\Software\\eclipse-jee-juno-SR1-win32-x86_64\\test\\" + files[i].getName();
+//		WSResponse response=new WSResponse();
+//		try{
+//			long startTime=System.currentTimeMillis();
+//			UUID requestId = UUID.randomUUID();
+//			FaceDetect faceDetect=new FaceDetect();
+//			HashMap<String, ArrayList<DetectedFaces>> faceList=faceDetect.run(requestId.toString(),uploadedFileLocation);
+//			FaceRecognition recognition= new FaceRecognition();
+//			HashMap<String, MatchResult> names=recognition.recognize(requestId.toString(),faceList);
+//			String output="";
+//			StringBuffer sb=new StringBuffer();
+//			if(names==null && names.size()<=0){
+//				output= "Cannot be recognized";
+//			}else{
+//				//if face is identified, do google search
+//				ArrayList<Annotations> annotations=new ArrayList<Annotations>();
+//				
+//				for (Entry<String, MatchResult> name : names.entrySet()) {
+//					Annotations annotation=new Annotations();
+//					//ImageSearch search=new ImageSearch();
+//					//ArrayList<SearchResponse> searchResp=search.getSearchResults(uploadedFileLocation,output);
+//					System.out.println(name);
+//					annotation.setText(name.getKey());
+//					sb.append(name.getKey()+",");
+//					if(name.getValue()!=null){
+//						DetectedFaces face=name.getValue().getFace();
+//						annotation.setX(face.getX());
+//						annotation.setY(face.getY());
+//						annotation.setHeight(face.getHeight());
+//						annotation.setWidth(face.getWidth());
+//					}					
+//					annotations.add(annotation);
+//				}
+//				response.setAnnotations(annotations);
+//			}
+//			response.setResult(output);
+//			
+//			long endTime=System.currentTimeMillis();
+//			
+//			System.out.println(uploadedFileLocation+"..."+sb.toString());
+//			System.out.println("\ntotal time taken="+(endTime-startTime)+" millisecs");
+//		}catch(Exception e){
+//			e.printStackTrace();
+//		}
+//	}
+//	
+//}
 
 }
 

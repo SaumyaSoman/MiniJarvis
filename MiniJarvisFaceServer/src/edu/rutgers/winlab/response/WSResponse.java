@@ -12,36 +12,39 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 public class WSResponse{
+	private String result="";
+	private ArrayList<Annotations> annotations=new ArrayList<Annotations>();
 	
-	private String text;
-	private ArrayList<SearchResponse> responses=new ArrayList<>();
 	
+
 	/**
-	 * @return the text
+	 * @return the result
 	 */
-	public String getText() {
-		return text;
+	public String getResult() {
+		return result;
 	}
 
 	/**
-	 * @param text the text to set
+	 * @param result the result to set
 	 */
-	public void setText(String text) {
-		this.text = text;
+	public void setResult(String result) {
+		this.result = result;
 	}
 
 	/**
-	 * @return the events
+	 * @return the annotations
 	 */
-	public ArrayList<SearchResponse> getResponses() {
-		return responses;
+	public ArrayList<Annotations> getAnnotations() {
+		return annotations;
 	}
 
 	/**
-	 * @param events the events to set
+	 * @param annotations the annotations to set
 	 */
-	public void setResponses(ArrayList<SearchResponse> events) {
-		this.responses = events;
+	public void setAnnotations(ArrayList<Annotations> annotations) {
+		this.annotations = annotations;
 	}
-
 }
+	
+
+
